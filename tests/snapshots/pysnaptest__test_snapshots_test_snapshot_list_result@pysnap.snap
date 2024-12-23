@@ -1,0 +1,9 @@
+---
+source: src/lib.rs
+expression: res
+---
+[
+  1,
+  2,
+  4
+]
