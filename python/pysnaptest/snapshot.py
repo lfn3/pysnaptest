@@ -17,10 +17,11 @@ def insta_snapshot(result: Callable[Any, Any], filename: str | None = None, fold
     else:
         assert_snapshot(folder_path, filename, result)
 
-def snapshot(fn_test: Callable[Any, Any]):
+def snapshot(filename: str | None = None, folder_path: str | None = None):
+    def decorator(fn_test: Callable[Any, Any]):
+        def asserted_test(*args, **kwargs):
+            result = fn_test(*args, **kwargs)
+            insta_snapshot(result, filename=filename, folder_path=folder_path)
 
-    def asserted_test(*args, **kwargs):
-        result = fn_test(*args, **kwargs)
-        insta_snapshot(result)
-
-    return asserted_test
+        return asserted_test
+    return decorator
