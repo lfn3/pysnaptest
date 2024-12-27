@@ -10,7 +10,7 @@ def insta_snapshot(result: Callable[Any, Any], filename: str | None = None, fold
     if folder_path is None:
         folder_path = str(os.path.dirname(os.path.abspath(test_path)))
     if filename is None:
-        filename = f"{test_path.split('/')[1].replace('.py', '')}_{test_name.split(' ')[0]}"
+        filename = f"{test_path.split('/')[-1].replace('.py', '')}_{test_name.split(' ')[0]}"
 
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(folder_path, filename, result)
