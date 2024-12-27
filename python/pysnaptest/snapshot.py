@@ -1,5 +1,6 @@
 from ._lib_name import assert_json_snapshot, assert_snapshot
 import os
+import pathlib
 from typing import Any, Callable
 
 
@@ -8,7 +9,11 @@ def insta_snapshot(result: Callable[Any, Any], filename: str | None = None, fold
     current_test = os.environ.get('PYTEST_CURRENT_TEST')
     (test_path, test_name) = current_test.split("::")
     if folder_path is None:
-        folder_path = str(os.path.dirname(os.path.abspath(test_path)))
+        test_path_file = pathlib.Path(test_path)
+        if test_path_file.is_file():
+            folder_path = str(test_path_file.resolve().parent)
+        else:
+            folder_path = str(pathlib.Path(test_path.split("/")[-1]).resolve().parent)
     if filename is None:
         filename = f"{test_path.split('/')[-1].replace('.py', '')}_{test_name.split(' ')[0]}"
 
