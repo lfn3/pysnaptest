@@ -30,6 +30,7 @@ venv/
 .installed.cfg
 *.egg
 *.pyd
+/python/pysnaptest/*.so
 
 # Installer logs
 pip-log.txt
