@@ -1,11 +1,12 @@
 [package]
 name = "pysnaptest"
-version = "0.1.17"
+version = "0.1.18"
 edition = "2021"
 include = [
     "/pyproject.toml",
     "/README.md",
     "/LICENSE",
+    "/rust-toolchain",
     "/src",
     "/python/pysnaptest",
     "/tests",
