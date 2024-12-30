@@ -1,7 +1,20 @@
 [package]
 name = "pysnaptest"
-version = "0.1.16"
+version = "0.1.17"
 edition = "2021"
+include = [
+    "/pyproject.toml",
+    "/README.md",
+    "/LICENSE",
+    "/src",
+    "/python/pysnaptest",
+    "/tests",
+    "/.cargo",
+    "!__pycache__",
+    "!tests/.hypothesis",
+    "!tests/.pytest_cache",
+    "!*.so",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
