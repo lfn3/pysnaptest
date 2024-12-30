@@ -16,3 +16,4 @@ dynamic = ["version"]
 features = ["pyo3/extension-module"]
 python-source = "python"
 module-name = "pysnaptest._lib_name"
+manifest-path = "Cargo.toml"
