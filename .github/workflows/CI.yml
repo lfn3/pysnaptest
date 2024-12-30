@@ -104,8 +104,15 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --sdist
+          args: --release --out dist --sdist --find-interpreter
           sccache: 'true'
+      - name: "Test wheel"
+        if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
+        shell: bash
+        run: |
+          python -m pip install dist/pynaptest-*.whl --force-reinstall
+          pysnaptest --help
+          python -m pysnaptest --help
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
