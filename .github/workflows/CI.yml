@@ -102,6 +102,8 @@ jobs:
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        env:
+          PYO3_PYTHON: python${{ matrix.python-version }}
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --sdist --find-interpreter
