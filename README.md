@@ -66,4 +66,4 @@ We welcome contributions to `pysnaptest`! To get started:
 
 ## Acknowledgments
 
-This library is inspired by and built upon the excellent [Insta](https://insta.rs/) library, originally created by [Armin Ronacher](https://lucumr.pocoo.org/). A big thank you to Armin and the Insta team for creating such a fantastic tool!
+This library is inspired by and built upon the excellent [Insta](https://insta.rs/) library. A big thank you to the Insta team for creating such a fantastic tool!
