@@ -20,3 +20,8 @@ def test_assert_json_snapshot() -> list[str]:
 
 def test_assert_snapshot() -> list[str]:
     assert_json_snapshot("expected_result")
+
+def test_assert_snapshot_multiple() -> list[str]:
+    snapshot_name_prefix = "test_snapshots_test_assert_snapshot_multiple"
+    assert_json_snapshot("expected_result_1", snapshot_name=f"{snapshot_name_prefix}_1")
+    assert_json_snapshot("expected_result_2", snapshot_name=f"{snapshot_name_prefix}_2")
