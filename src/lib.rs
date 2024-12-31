@@ -8,21 +8,21 @@ const PYSNAPSHOT_SUFFIX: &str = "pysnap";
 
 #[pyfunction]
 fn assert_json_snapshot(
-    folder_path: String,
-    name: String,
+    snapshot_path: String,
+    snapshot_name: String,
     result: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
     let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
-    insta::with_settings!({snapshot_path => format!("{folder_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
-        insta::assert_json_snapshot!(name, res);
+    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+        insta::assert_json_snapshot!(snapshot_name, res);
     });
     Ok(())
 }
 
 #[pyfunction]
-fn assert_snapshot(folder_path: String, name: String, result: &Bound<'_, PyAny>) -> PyResult<()> {
-    insta::with_settings!({snapshot_path => format!("{folder_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
-        insta::assert_snapshot!(name, result);
+fn assert_snapshot(snapshot_path: String, snapshot_name: String, result: &Bound<'_, PyAny>) -> PyResult<()> {
+    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+        insta::assert_snapshot!(snapshot_name, result);
     });
     Ok(())
 }

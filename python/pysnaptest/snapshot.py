@@ -4,23 +4,24 @@ import pathlib
 from typing import Callable, Any, overload
 from functools import partial, wraps
 
-def insta_snapshot(result: Callable, filename: str | None = None, folder_path: str | None = None):
+def extract_snapshot_path(test_path: str) -> str:
+    test_path_file = pathlib.Path(test_path)
+    snapshot_dir = test_path_file.resolve().parent if test_path_file.is_file() else pathlib.Path(test_path.split("/")[-1]).resolve().parent
+    return str(snapshot_dir)
+
+def insta_snapshot(result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None):
 
     current_test = os.environ.get('PYTEST_CURRENT_TEST')
     (test_path, test_name) = current_test.split("::")
-    if folder_path is None:
-        test_path_file = pathlib.Path(test_path)
-        if test_path_file.is_file():
-            folder_path = str(test_path_file.resolve().parent)
-        else:
-            folder_path = str(pathlib.Path(test_path.split("/")[-1]).resolve().parent)
-    if filename is None:
-        filename = f"{test_path.split('/')[-1].replace('.py', '')}_{test_name.split(' ')[0]}"
+    if snapshot_path is None:
+        snapshot_path = extract_snapshot_path(test_path)
+    if snapshot_name is None:
+        snapshot_name = f"{test_path.split('/')[-1].replace('.py', '')}_{test_name.split(' ')[0]}"
 
     if isinstance(result, dict) or isinstance(result, list):
-        assert_json_snapshot(folder_path, filename, result)
+        assert_json_snapshot(snapshot_path, snapshot_name, result)
     else:
-        assert_snapshot(folder_path, filename, result)
+        assert_snapshot(snapshot_path, snapshot_name, result)
 
 @overload
 def snapshot(func: Callable) -> Callable:
@@ -33,12 +34,12 @@ def snapshot(*, filename: str | None = None, folder_path: str | None = None) -> 
 
 
 def snapshot(  # noqa: F811
-    func: Callable | None = None, *, filename: str | None = None, folder_path: str | None = None
+    func: Callable | None = None, *, snapshot_path: str | None = None, snapshot_name: str | None = None
 ) -> Callable:
 
     def asserted_func(func: Callable, *args: Any, **kwargs: Any):
         result = func(*args, **kwargs)
-        insta_snapshot(result, filename=filename, folder_path=folder_path)
+        insta_snapshot(result, snapshot_path=snapshot_path, snapshot_name=snapshot_name)
 
     # Without arguments `func` is passed directly to the decorator
     if func is not None:
