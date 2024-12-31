@@ -19,6 +19,4 @@ module-name = "pysnaptest._lib_name"
 bindings = 'pyo3'
 
 [tool.pytest.ini_options]
-env = [
-    "INSTA_WORKSPACE_ROOT=tests"
-]
+testpaths = "tests"
