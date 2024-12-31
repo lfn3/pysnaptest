@@ -23,18 +23,13 @@ pip install pysnaptest
 
 ## Updating Snapshots
 
-If the output changes intentionally, you can review and update snapshots using the `cargo insta review` command. This provides an interactive workflow to inspect changes and accept or reject updates.
-
-### Prerequisite: Install Cargo
-
-To use the snapshot review feature, you’ll need Rust's package manager, `cargo`. You can install it by following the instructions at [rustup.rs](https://rustup.rs/).
+If the output changes intentionally, you can review and update snapshots using the `cargo-insta review` command. This provides an interactive workflow to inspect changes and accept or reject updates.
 
 ### Running Snapshot Review
 
-Once `cargo` is installed, run the following command to review and update snapshots:
-
+You can install `cargo-insta` binaries from [cargo-insta](https://github.com/mitsuhiko/insta/tree/master/cargo-insta). After that you should be able to review snapshots with the following:
 ```bash
-cargo insta review
+cargo-insta review
 ```
 
 This command allows you to inspect differences and choose which snapshots to update.
