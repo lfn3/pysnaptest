@@ -46,7 +46,7 @@ To help you get started, we’ve included a collection of examples in the `examp
 To try them out:
 
 ```bash
-cd examples
+cd examples/my_project
 pytest
 ```
 
