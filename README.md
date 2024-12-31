@@ -21,7 +21,7 @@ You can install `pysnaptest` via pip:
 pip install pysnaptest
 ```
 
-Updating Snapshots
+## Updating Snapshots
 
 If the output changes intentionally, you can review and update snapshots using the cargo insta review command. This provides an interactive workflow to inspect changes and accept or reject updates.
 
@@ -34,27 +34,30 @@ Once cargo is installed, run the following command to review and update snapshot
 cargo insta review
 This command allows you to inspect differences and choose which snapshots to update.
 
-Examples
+## Examples
 
 To help you get started, we’ve included a collection of examples in the examples folder. These examples demonstrate how to use pysnaptest in toy projects and cover common use cases like snapshotting strings, JSON, and other data structures.
 
 To try them out:
 
+```bash
 cd examples
 pytest
+```
 Feel free to explore, modify, and build upon these examples for your own projects!
 
-Contributing
+## Contributing
 
 We welcome contributions to pysnaptest! To get started:
 
-Fork the repository.
-Create a new branch for your feature or fix.
-Submit a pull request with a clear description of your changes.
-License
+- Fork the repository.
+- Create a new branch for your feature or fix.
+- Submit a pull request with a clear description of your changes.
+
+## License
 
 pysnaptest is licensed under the Apache License, Version 2.0. See the LICENSE file for details.
 
-Acknowledgments
+## Acknowledgments
 
 This library is inspired by and built upon the excellent rust Insta crate. A big thank you to the Insta team for creating such a fantastic tool!
