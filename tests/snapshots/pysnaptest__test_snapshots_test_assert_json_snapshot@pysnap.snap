@@ -1,0 +1,7 @@
+---
+source: src/lib.rs
+expression: res
+---
+{
+  "assert_json_snapshot": "expected_result"
+}
