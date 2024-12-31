@@ -23,7 +23,7 @@ name = "pysnaptest"
 crate-type = ["cdylib"]
 
 [dependencies]
-insta = { version = "1.41", features = ["json"] }
+insta = { version = "1.41", features = ["json", "csv"] }
 pyo3 = { version = "0.23.1", features = ["generate-import-lib"] }
 pythonize = "0.23.0"
 serde = { version = "1.0.216", features = ["derive"] }

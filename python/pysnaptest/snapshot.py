@@ -1,4 +1,5 @@
 from ._lib_name import assert_json_snapshot as _assert_json_snapshot
+from ._lib_name import assert_csv_snapshot as _assert_csv_snapshot
 from ._lib_name import assert_snapshot as _assert_snapshot
 import os
 import pathlib
@@ -37,6 +38,14 @@ def assert_json_snapshot(
         snapshot_path, snapshot_name
     )
     _assert_json_snapshot(snapshot_path, snapshot_name, result)
+
+def assert_csv_snapshot(
+    result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None
+):
+    (snapshot_path, snapshot_name) = extract_from_pytest_env(
+        snapshot_path, snapshot_name
+    )
+    _assert_csv_snapshot(snapshot_path, snapshot_name, result)
 
 
 def assert_snapshot(

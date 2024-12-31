@@ -20,6 +20,19 @@ fn assert_json_snapshot(
 }
 
 #[pyfunction]
+fn assert_csv_snapshot(
+    snapshot_path: String,
+    snapshot_name: String,
+    result: &Bound<'_, PyAny>,
+) -> PyResult<()> {
+    let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
+    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+        insta::assert_csv_snapshot!(snapshot_name, res);
+    });
+    Ok(())
+}
+
+#[pyfunction]
 fn assert_snapshot(snapshot_path: String, snapshot_name: String, result: &Bound<'_, PyAny>) -> PyResult<()> {
     insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
         insta::assert_snapshot!(snapshot_name, result);
@@ -32,5 +45,6 @@ fn assert_snapshot(snapshot_path: String, snapshot_name: String, result: &Bound<
 fn pysnaptest(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(assert_snapshot, m)?)?;
     m.add_function(wrap_pyfunction!(assert_json_snapshot, m)?)?;
+    m.add_function(wrap_pyfunction!(assert_csv_snapshot, m)?)?;
     Ok(())
 }
