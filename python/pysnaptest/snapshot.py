@@ -1,8 +1,11 @@
 from ._lib_name import assert_json_snapshot, assert_snapshot
 import os
 import pathlib
-from typing import Any, Callable
+from typing import Callable, TypeVar, ParamSpec, Any, overload
+from functools import partial, wraps
 
+P = ParamSpec("P") # requires python >= 3.10
+R = TypeVar("R")
 
 def insta_snapshot(result: Callable[Any, Any], filename: str | None = None, folder_path: str | None = None):
 
@@ -22,11 +25,40 @@ def insta_snapshot(result: Callable[Any, Any], filename: str | None = None, fold
     else:
         assert_snapshot(folder_path, filename, result)
 
-def snapshot(filename: str | None = None, folder_path: str | None = None):
-    def decorator(fn_test: Callable[Any, Any]):
-        def asserted_test(*args, **kwargs):
-            result = fn_test(*args, **kwargs)
-            insta_snapshot(result, filename=filename, folder_path=folder_path)
+# def snapshot(filename: str | None = None, folder_path: str | None = None):
+#     def decorator(fn_test: Callable[Any, Any]):
+#         def asserted_test(*args, **kwargs):
+#             result = fn_test(*args, **kwargs)
+#             insta_snapshot(result, filename=filename, folder_path=folder_path)
 
-        return asserted_test
+#         return asserted_test
+#     return decorator
+
+@overload
+def snapshot(func: Callable) -> Callable:
+    ...
+
+
+@overload
+def snapshot(*, filename: str | None = None, folder_path: str | None = None) -> Callable:  # noqa: F811
+    ...
+
+
+def snapshot(  # noqa: F811
+    func: Callable | None = None, *, filename: str | None = None, folder_path: str | None = None
+) -> Callable:
+
+    def wrapper(func: Callable[P, R], *args: Any, **kwargs: Any) -> R:
+        result = func(*args, **kwargs)
+        insta_snapshot(result, filename=filename, folder_path=folder_path)
+
+    # Without arguments `func` is passed directly to the decorator
+    if func is not None:
+        if not callable(func):
+            raise TypeError("Not a callable. Did you use a non-keyword argument?")
+        return wraps(func)(partial(wrapper, func))
+
+    # With arguments, we need to return a function that accepts the function
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        return wraps(func)(partial(wrapper, func))
     return decorator
