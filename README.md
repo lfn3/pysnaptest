@@ -1,4 +1,4 @@
-# PySnaptest
+# PySnapTest
 
 `pysnaptest` is a Python wrapper for the powerful [Insta](https://insta.rs/) library written in Rust. It brings the simplicity and performance of snapshot testing from Rust to Python, enabling developers to quickly and easily test complex outputs, including strings, JSON, and other serializable data.
 
@@ -23,20 +23,25 @@ pip install pysnaptest
 
 ## Updating Snapshots
 
-If the output changes intentionally, you can review and update snapshots using the cargo insta review command. This provides an interactive workflow to inspect changes and accept or reject updates.
+If the output changes intentionally, you can review and update snapshots using the `cargo insta review` command. This provides an interactive workflow to inspect changes and accept or reject updates.
 
-Prerequisite: Install Cargo
-To use the snapshot review feature, you’ll need Rust's package manager, cargo. You can install it by following the instructions at rustup.rs.
+### Prerequisite: Install Cargo
 
-Running Snapshot Review
-Once cargo is installed, run the following command to review and update snapshots:
+To use the snapshot review feature, you’ll need Rust's package manager, `cargo`. You can install it by following the instructions at [rustup.rs](https://rustup.rs/).
 
+### Running Snapshot Review
+
+Once `cargo` is installed, run the following command to review and update snapshots:
+
+```bash
 cargo insta review
+```
+
 This command allows you to inspect differences and choose which snapshots to update.
 
 ## Examples
 
-To help you get started, we’ve included a collection of examples in the examples folder. These examples demonstrate how to use pysnaptest in toy projects and cover common use cases like snapshotting strings, JSON, and other data structures.
+To help you get started, we’ve included a collection of examples in the `examples` folder. These examples demonstrate how to use `pysnaptest` in toy projects and cover common use cases like snapshotting strings, JSON, and other data structures.
 
 To try them out:
 
@@ -44,20 +49,21 @@ To try them out:
 cd examples
 pytest
 ```
+
 Feel free to explore, modify, and build upon these examples for your own projects!
 
 ## Contributing
 
-We welcome contributions to pysnaptest! To get started:
+We welcome contributions to `pysnaptest`! To get started:
 
-- Fork the repository.
-- Create a new branch for your feature or fix.
-- Submit a pull request with a clear description of your changes.
+1. Fork the repository.
+2. Create a new branch for your feature or fix.
+3. Submit a pull request with a clear description of your changes.
 
 ## License
 
-pysnaptest is licensed under the Apache License, Version 2.0. See the LICENSE file for details.
+`pysnaptest` is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-This library is inspired by and built upon the excellent rust Insta crate. A big thank you to the Insta team for creating such a fantastic tool!
+This library is inspired by and built upon the excellent [Insta](https://insta.rs/) library, originally created by [Armin Ronacher](https://lucumr.pocoo.org/). A big thank you to Armin and the Insta team for creating such a fantastic tool!
