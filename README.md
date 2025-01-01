@@ -36,7 +36,7 @@ This command allows you to inspect differences and choose which snapshots to upd
 
 ## Examples
 
-To help you get started, we’ve included a collection of examples in the `examples` folder. These examples demonstrate how to use `pysnaptest` in toy projects and cover common use cases like snapshotting strings, JSON, and other data structures.
+To help you get started, we’ve included a collection of examples in the `examples` folder. These examples demonstrate how to use `pysnaptest` in projects and cover common use cases like snapshotting strings, JSON, and other data structures.
 
 To try them out:
 
