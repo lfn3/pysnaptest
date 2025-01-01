@@ -74,6 +74,8 @@ def insta_snapshot(
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name)
+    elif isinstance(result, pd.DataFrame) or isinstance(result, pl.DataFrame):
+        assert_dataframe_snapshot(result, snapshot_path, snapshot_name)
     else:
         assert_snapshot(result, snapshot_path, snapshot_name)
 
