@@ -3,8 +3,10 @@ from ._lib_name import assert_csv_snapshot as _assert_csv_snapshot
 from ._lib_name import assert_snapshot as _assert_snapshot
 import os
 import pathlib
-from typing import Callable, Any, overload, Tuple
+from typing import Callable, Any, overload, Tuple, Union
 from functools import partial, wraps
+import pandas as pd
+import polars as pl
 
 
 def extract_snapshot_path(test_path: str) -> str:
@@ -32,7 +34,7 @@ def extract_from_pytest_env(
 
 
 def assert_json_snapshot(
-    result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None
+    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
     (snapshot_path, snapshot_name) = extract_from_pytest_env(
         snapshot_path, snapshot_name
@@ -40,16 +42,26 @@ def assert_json_snapshot(
     _assert_json_snapshot(snapshot_path, snapshot_name, result)
 
 def assert_csv_snapshot(
-    result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None
+    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
     (snapshot_path, snapshot_name) = extract_from_pytest_env(
         snapshot_path, snapshot_name
     )
     _assert_csv_snapshot(snapshot_path, snapshot_name, result)
 
+def assert_dataframe_snapshot(
+    df: Union[pd.DataFrame, pl.DataFrame], snapshot_path: str | None = None, snapshot_name: str | None = None, *args, **kwargs
+):  
+    if isinstance(df, pd.DataFrame):
+        result = df.to_csv(*args, **kwargs)
+    elif isinstance(df, pl.DataFrame):
+        result = df.write_csv(*args, **kwargs)
+    else:
+        raise ValueError("Unsupported dataframe type, only pandas and polars are supported")
+    assert_csv_snapshot(result, snapshot_path, snapshot_name)
 
 def assert_snapshot(
-    result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None
+    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
     (snapshot_path, snapshot_name) = extract_from_pytest_env(
         snapshot_path, snapshot_name
@@ -58,7 +70,7 @@ def assert_snapshot(
 
 
 def insta_snapshot(
-    result: Callable, snapshot_path: str | None = None, snapshot_name: str | None = None
+    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name)

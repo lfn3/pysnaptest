@@ -1,4 +1,4 @@
-from pysnaptest import snapshot, assert_json_snapshot, assert_csv_snapshot
+from pysnaptest import snapshot, assert_json_snapshot, assert_dataframe_snapshot
 import pandas as pd
 
 
@@ -22,10 +22,9 @@ def test_assert_json_snapshot() -> list[str]:
 def test_assert_snapshot() -> list[str]:
     assert_json_snapshot("expected_result")
 
-def test_assert_csv_snapshot() -> list[str]:
+def test_assert_dataframe_snapshot() -> list[str]:
     df = pd.DataFrame({"name":['foo','bar'],"id":[1,2]})
-    csv = df.to_csv()
-    assert_csv_snapshot(csv)
+    assert_dataframe_snapshot(df, index=False)
 
 def test_assert_snapshot_multiple() -> list[str]:
     snapshot_name_prefix = "test_snapshots_test_assert_snapshot_multiple"
