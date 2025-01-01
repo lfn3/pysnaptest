@@ -16,15 +16,19 @@ def test_snapshot_dict_result() -> dict[str, str]:
 def test_snapshot_list_result() -> list[str]:
     return [1, 2, 4]
 
+
 def test_assert_json_snapshot() -> list[str]:
     assert_json_snapshot({"assert_json_snapshot": "expected_result"})
+
 
 def test_assert_snapshot() -> list[str]:
     assert_json_snapshot("expected_result")
 
+
 def test_assert_dataframe_snapshot() -> list[str]:
-    df = pd.DataFrame({"name":['foo','bar'],"id":[1,2]})
+    df = pd.DataFrame({"name": ["foo", "bar"], "id": [1, 2]})
     assert_dataframe_snapshot(df, index=False)
+
 
 def test_assert_snapshot_multiple() -> list[str]:
     snapshot_name_prefix = "test_snapshots_test_assert_snapshot_multiple"

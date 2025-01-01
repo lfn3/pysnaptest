@@ -41,6 +41,7 @@ def assert_json_snapshot(
     )
     _assert_json_snapshot(snapshot_path, snapshot_name, result)
 
+
 def assert_csv_snapshot(
     result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
@@ -49,16 +50,24 @@ def assert_csv_snapshot(
     )
     _assert_csv_snapshot(snapshot_path, snapshot_name, result)
 
+
 def assert_dataframe_snapshot(
-    df: Union[pd.DataFrame, pl.DataFrame], snapshot_path: str | None = None, snapshot_name: str | None = None, *args, **kwargs
-):  
+    df: Union[pd.DataFrame, pl.DataFrame],
+    snapshot_path: str | None = None,
+    snapshot_name: str | None = None,
+    *args,
+    **kwargs,
+):
     if isinstance(df, pd.DataFrame):
         result = df.to_csv(*args, **kwargs)
     elif isinstance(df, pl.DataFrame):
         result = df.write_csv(*args, **kwargs)
     else:
-        raise ValueError("Unsupported dataframe type, only pandas and polars are supported")
+        raise ValueError(
+            "Unsupported dataframe type, only pandas and polars are supported"
+        )
     assert_csv_snapshot(result, snapshot_path, snapshot_name)
+
 
 def assert_snapshot(
     result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
