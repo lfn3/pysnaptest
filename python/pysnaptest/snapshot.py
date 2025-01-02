@@ -7,6 +7,7 @@ from typing import Callable, Any, overload, Tuple, Union
 from functools import partial, wraps
 import pandas as pd
 import polars as pl
+import asyncio
 
 
 def extract_snapshot_path(test_path: str) -> str:
@@ -106,9 +107,21 @@ def snapshot(  # noqa: F811
     snapshot_path: str | None = None,
     snapshot_name: str | None = None,
 ) -> Callable:
-    def asserted_func(func: Callable, *args: Any, **kwargs: Any):
-        result = func(*args, **kwargs)
-        insta_snapshot(result, snapshot_path=snapshot_path, snapshot_name=snapshot_name)
+    if asyncio.iscoroutinefunction(func):
+
+        async def asserted_func(func: Callable, *args: Any, **kwargs: Any):
+            result = await func(*args, **kwargs)
+            insta_snapshot(
+                result, snapshot_path=snapshot_path, snapshot_name=snapshot_name
+            )
+
+    else:
+
+        def asserted_func(func: Callable, *args: Any, **kwargs: Any):
+            result = func(*args, **kwargs)
+            insta_snapshot(
+                result, snapshot_path=snapshot_path, snapshot_name=snapshot_name
+            )
 
     # Without arguments `func` is passed directly to the decorator
     if func is not None:
