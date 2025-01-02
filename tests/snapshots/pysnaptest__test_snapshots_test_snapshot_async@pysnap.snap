@@ -1,0 +1,5 @@
+---
+source: src/lib.rs
+expression: result
+---
+5

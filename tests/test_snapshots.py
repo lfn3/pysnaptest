@@ -1,6 +1,7 @@
 from pysnaptest import snapshot, assert_json_snapshot, assert_dataframe_snapshot
 import pandas as pd
 import polars as pl
+import pytest
 
 
 @snapshot
@@ -30,15 +31,22 @@ def test_assert_pandas_dataframe_snapshot():
     df = pd.DataFrame({"name": ["foo", "bar"], "id": [1, 2]})
     assert_dataframe_snapshot(df, index=False)
 
+
 @snapshot
 def test_assert_polars_dataframe_snapshot() -> pl.DataFrame:
     return pl.DataFrame(
-    {
-        "foo": [1, 2, 3, 4, 5],
-        "bar": [6, 7, 8, 9, 10],
-        "ham": ["a", "b", "c", "d", "e"],
-    }
-)
+        {
+            "foo": [1, 2, 3, 4, 5],
+            "bar": [6, 7, 8, 9, 10],
+            "ham": ["a", "b", "c", "d", "e"],
+        }
+    )
+
+
+@pytest.mark.asyncio
+@snapshot
+async def test_snapshot_async() -> int:
+    return 5
 
 
 def test_assert_snapshot_multiple():
