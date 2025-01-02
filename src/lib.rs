@@ -6,6 +6,13 @@ use pyo3::{
 
 const PYSNAPSHOT_SUFFIX: &str = "pysnap";
 
+fn setttings(snapshot_path: String) -> insta::Settings {
+    let mut settings = insta::Settings::clone_current();
+    settings.set_snapshot_path(format!("{snapshot_path}/snapshots"));
+    settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
+    settings
+}
+
 #[pyfunction]
 fn assert_json_snapshot(
     snapshot_path: String,
@@ -13,7 +20,8 @@ fn assert_json_snapshot(
     result: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
     let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
-    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+    let settings = setttings(snapshot_path);
+    settings.bind(|| {
         insta::assert_json_snapshot!(snapshot_name, res);
     });
     Ok(())
@@ -26,15 +34,21 @@ fn assert_csv_snapshot(
     result: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
     let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
-    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+    let settings = setttings(snapshot_path);
+    settings.bind(|| {
         insta::assert_csv_snapshot!(snapshot_name, res);
     });
     Ok(())
 }
 
 #[pyfunction]
-fn assert_snapshot(snapshot_path: String, snapshot_name: String, result: &Bound<'_, PyAny>) -> PyResult<()> {
-    insta::with_settings!({snapshot_path => format!("{snapshot_path}/snapshots"), snapshot_suffix => PYSNAPSHOT_SUFFIX}, {
+fn assert_snapshot(
+    snapshot_path: String,
+    snapshot_name: String,
+    result: &Bound<'_, PyAny>,
+) -> PyResult<()> {
+    let settings = setttings(snapshot_path);
+    settings.bind(|| {
         insta::assert_snapshot!(snapshot_name, result);
     });
     Ok(())
