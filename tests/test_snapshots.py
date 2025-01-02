@@ -1,7 +1,21 @@
+from __future__ import annotations
+
 from pysnaptest import snapshot, assert_json_snapshot, assert_dataframe_snapshot
-import pandas as pd
-import polars as pl
 import pytest
+
+try:
+    import pandas as pd
+
+    PANDAS_UNAVAILABLE = False
+except ImportError:
+    PANDAS_UNAVAILABLE = True
+
+try:
+    import polars as pl
+
+    POLARS_UNAVAILABLE = False
+except ImportError:
+    POLARS_UNAVAILABLE = True
 
 
 @snapshot
@@ -27,11 +41,13 @@ def test_assert_snapshot():
     assert_json_snapshot("expected_result")
 
 
+@pytest.mark.skipif(PANDAS_UNAVAILABLE, reason="Pandas is an optional dependency")
 def test_assert_pandas_dataframe_snapshot():
     df = pd.DataFrame({"name": ["foo", "bar"], "id": [1, 2]})
     assert_dataframe_snapshot(df, index=False)
 
 
+@pytest.mark.skipif(POLARS_UNAVAILABLE, reason="Polars is an optional dependency")
 @snapshot
 def test_assert_polars_dataframe_snapshot() -> pl.DataFrame:
     return pl.DataFrame(
