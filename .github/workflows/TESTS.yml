@@ -108,9 +108,9 @@ jobs:
         run: 
           pip install -r requirements.txt
 
-      - name: Maturin develop
+      - name: Install PySnaptest
         run: 
-          maturin develop
+          pip install -e .
 
       - name: Tests Python
         run: pytest
