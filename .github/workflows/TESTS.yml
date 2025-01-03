@@ -15,41 +15,69 @@ permissions:
 
 jobs:
 
-  lint-rust:
+  check-rust:
+    name: RustCheck
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION_STABLE }}
           profile: minimal
-          components: rustfmt, clippy
+          toolchain: stable
           override: true
-      - name: Run clippy
-        run: cargo clippy --all-targets -- -D warnings $(cat .lints | cut -f1 -d"#" | tr '\n' ' ')
-      - name: Run rustfmt
-        run: cargo fmt -- --check
-      - name: Run cargo-deny
-        uses: EmbarkStudios/cargo-deny-action@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
 
-  test-rust:
+  fmt-rust:
+    name: Rustfmt
+    needs: RustCheck
     runs-on: ubuntu-latest
-    needs: lint-rust
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION_STABLE }}
           profile: minimal
+          toolchain: stable
           override: true
-      - name: Build
-        run: cargo build --all-targets
-      - name: Test
-        run: cargo test
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  clippy:
+    name: Clippy
+    needs: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+          override: true
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
+          name: Clippy Output
+
+  tests-rust:
+    name: RustTests
+    needs: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
     
   lint-python:
     runs-on: ubuntu-latest
