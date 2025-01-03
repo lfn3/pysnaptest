@@ -6,7 +6,8 @@
 name: CI
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Run Tests"]
     branches:
       - main
       - master
