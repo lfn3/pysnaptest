@@ -1,13 +1,16 @@
+from __future__ import annotations
 from ._lib_name import assert_json_snapshot as _assert_json_snapshot
 from ._lib_name import assert_csv_snapshot as _assert_csv_snapshot
 from ._lib_name import assert_snapshot as _assert_snapshot
 import os
 import pathlib
-from typing import Callable, Any, overload, Tuple, Union
+from typing import Callable, Any, overload, Tuple, Union, TYPE_CHECKING
 from functools import partial, wraps
-import pandas as pd
-import polars as pl
 import asyncio
+
+if TYPE_CHECKING:
+    import pandas as pd
+    import polars as pl
 
 
 def extract_snapshot_path(test_path: str) -> str:
@@ -52,6 +55,24 @@ def assert_csv_snapshot(
     _assert_csv_snapshot(snapshot_path, snapshot_name, result)
 
 
+def try_is_pandas_df(maybe_df: Any) -> bool:
+    try:
+        import pandas as pd
+    except ImportError:
+        return False
+
+    return isinstance(maybe_df, pd.DataFrame)
+
+
+def try_is_polars_df(maybe_df: Any) -> bool:
+    try:
+        import polars as pl
+    except ImportError:
+        return False
+
+    return isinstance(maybe_df, pl.DataFrame)
+
+
 def assert_dataframe_snapshot(
     df: Union[pd.DataFrame, pl.DataFrame],
     snapshot_path: str | None = None,
@@ -59,13 +80,17 @@ def assert_dataframe_snapshot(
     *args,
     **kwargs,
 ):
-    if isinstance(df, pd.DataFrame):
+    result = None
+    if try_is_pandas_df(df):
         result = df.to_csv(*args, **kwargs)
-    elif isinstance(df, pl.DataFrame):
+
+    if try_is_polars_df(df):
         result = df.write_csv(*args, **kwargs)
-    else:
+
+    if result is None:
         raise ValueError(
-            "Unsupported dataframe type, only pandas and polars are supported"
+            "Unsupported dataframe type, only pandas and polars are supported. "
+            "(We may also be unable to import both pandas and polars for some reason, but this is not likely)"
         )
     assert_csv_snapshot(result, snapshot_path, snapshot_name)
 
@@ -84,7 +109,7 @@ def insta_snapshot(
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name)
-    elif isinstance(result, pd.DataFrame) or isinstance(result, pl.DataFrame):
+    elif try_is_pandas_df(result) or try_is_polars_df(result):
         assert_dataframe_snapshot(result, snapshot_path, snapshot_name)
     else:
         assert_snapshot(result, snapshot_path, snapshot_name)
