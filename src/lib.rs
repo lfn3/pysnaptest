@@ -55,7 +55,7 @@ fn assert_snapshot(
 }
 
 #[pymodule]
-#[pyo3(name = "_lib_name")]
+#[pyo3(name = "_pysnaptest")]
 fn pysnaptest(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(assert_snapshot, m)?)?;
     m.add_function(wrap_pyfunction!(assert_json_snapshot, m)?)?;
