@@ -19,7 +19,7 @@ fn assert_json_snapshot(
     snapshot_name: String,
     result: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
-    let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
+    let res: serde_json::Value = pythonize::depythonize(result).unwrap();
     let settings = setttings(snapshot_path);
     settings.bind(|| {
         insta::assert_json_snapshot!(snapshot_name, res);
@@ -33,7 +33,7 @@ fn assert_csv_snapshot(
     snapshot_name: String,
     result: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
-    let res: serde_json::Value = pythonize::depythonize(&result).unwrap();
+    let res: serde_json::Value = pythonize::depythonize(result).unwrap();
     let settings = setttings(snapshot_path);
     settings.bind(|| {
         insta::assert_csv_snapshot!(snapshot_name, res);
