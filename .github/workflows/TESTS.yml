@@ -1,0 +1,88 @@
+name: TESTS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - '*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+
+  lint-rust:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION_STABLE }}
+          profile: minimal
+          components: rustfmt, clippy
+          override: true
+      - name: Run clippy
+        run: cargo clippy --all-targets -- -D warnings $(cat .lints | cut -f1 -d"#" | tr '\n' ' ')
+      - name: Run rustfmt
+        run: cargo fmt -- --check
+      - name: Run cargo-deny
+        uses: EmbarkStudios/cargo-deny-action@v1
+
+  test-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION_STABLE }}
+          profile: minimal
+          override: true
+      - name: Build
+        run: cargo build --all-targets
+      - name: Test
+        run: cargo test
+    
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Ruff
+        run: ruff format --check
+
+  test-python:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      
+      - name: Install Dependencies
+        run: 
+          pip install -r requirements.txt
+
+      - name: Maturin develop
+        run: 
+          maturin develop
+
+      - name: Tests Python
+        run: pytest
