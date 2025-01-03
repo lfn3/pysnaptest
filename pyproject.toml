@@ -19,7 +19,7 @@ polars = ["polars>=0.18"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "pysnaptest._lib_name"
+module-name = "pysnaptest._pysnaptest"
 bindings = 'pyo3'
 
 [tool.pytest.ini_options]

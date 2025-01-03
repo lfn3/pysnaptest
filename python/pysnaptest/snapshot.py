@@ -1,7 +1,7 @@
 from __future__ import annotations
-from ._lib_name import assert_json_snapshot as _assert_json_snapshot
-from ._lib_name import assert_csv_snapshot as _assert_csv_snapshot
-from ._lib_name import assert_snapshot as _assert_snapshot
+from ._pysnaptest import assert_json_snapshot as _assert_json_snapshot
+from ._pysnaptest import assert_csv_snapshot as _assert_csv_snapshot
+from ._pysnaptest import assert_snapshot as _assert_snapshot
 import os
 import pathlib
 from typing import Callable, Any, overload, Tuple, Union, TYPE_CHECKING
