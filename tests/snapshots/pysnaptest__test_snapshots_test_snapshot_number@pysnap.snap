@@ -1,5 +1,5 @@
 ---
 source: src/lib.rs
-expression: result
+input_file: tests/test_snapshots.py
 ---
 5

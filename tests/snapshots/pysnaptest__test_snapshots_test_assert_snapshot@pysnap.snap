@@ -1,5 +1,5 @@
 ---
 source: src/lib.rs
-expression: res
+input_file: tests/test_snapshots.py
 ---
 "expected_result"
