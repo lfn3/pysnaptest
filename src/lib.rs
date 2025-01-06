@@ -55,21 +55,20 @@ impl TestInfo {
     }
 
     fn snapshot_name(&self) -> String {
-        self.snapshot_name_override
-            .as_ref()
-            .map(|s| s.clone())
-            .unwrap_or_else(|| {
-                let test_name = self
-                    .test_name
-                    .strip_suffix(" (call)")
-                    .unwrap_or(self.test_name.as_ref());
-                let file_name = self.test_path.file_stem().and_then(|s| s.to_str());
-                if let Some(f) = file_name {
-                    format!("{f}_{test_name}")
-                } else {
-                    test_name.to_string()
-                }
-            })
+        if let Some(sno) = self.snapshot_name_override.as_ref() {
+            return sno.clone();
+        }
+
+        let test_name = self
+            .test_name
+            .strip_suffix(" (call)")
+            .unwrap_or(self.test_name.as_ref());
+        let file_name = self.test_path.file_stem().and_then(|s| s.to_str());
+        if let Some(f) = file_name {
+            format!("{f}_{test_name}")
+        } else {
+            test_name.to_string()
+        }
     }
 }
 
