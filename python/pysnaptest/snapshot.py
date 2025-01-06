@@ -2,9 +2,10 @@ from __future__ import annotations
 from ._pysnaptest import assert_json_snapshot as _assert_json_snapshot
 from ._pysnaptest import assert_csv_snapshot as _assert_csv_snapshot
 from ._pysnaptest import assert_snapshot as _assert_snapshot
+from ._pysnaptest import TestInfo
 import os
 import pathlib
-from typing import Callable, Any, overload, Tuple, Union, TYPE_CHECKING
+from typing import Callable, Any, overload, Union, TYPE_CHECKING
 from functools import partial, wraps
 import asyncio
 
@@ -25,34 +26,30 @@ def extract_snapshot_path(test_path: str) -> str:
 
 def extract_from_pytest_env(
     snapshot_path: str | None = None, snapshot_name: str | None = None
-) -> Tuple[str, str]:
+) -> TestInfo:
     current_test = os.environ.get("PYTEST_CURRENT_TEST")
     (test_path, test_name) = current_test.split("::")
-    if snapshot_path is None:
-        snapshot_path = extract_snapshot_path(test_path)
-    if snapshot_name is None:
-        snapshot_name = (
-            f"{test_path.split('/')[-1].replace('.py', '')}_{test_name.split(' ')[0]}"
-        )
-    return snapshot_path, snapshot_name
+
+    return TestInfo(
+        test_name=test_name,
+        test_path=pathlib.Path(test_path).resolve(),
+        snapshot_path_override=snapshot_path,
+        snapshot_name_override=snapshot_name,
+    )
 
 
 def assert_json_snapshot(
     result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
-    (snapshot_path, snapshot_name) = extract_from_pytest_env(
-        snapshot_path, snapshot_name
-    )
-    _assert_json_snapshot(snapshot_path, snapshot_name, result)
+    test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
+    _assert_json_snapshot(test_info, result)
 
 
 def assert_csv_snapshot(
     result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
-    (snapshot_path, snapshot_name) = extract_from_pytest_env(
-        snapshot_path, snapshot_name
-    )
-    _assert_csv_snapshot(snapshot_path, snapshot_name, result)
+    test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
+    _assert_csv_snapshot(test_info, result)
 
 
 def try_is_pandas_df(maybe_df: Any) -> bool:
@@ -98,10 +95,8 @@ def assert_dataframe_snapshot(
 def assert_snapshot(
     result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None
 ):
-    (snapshot_path, snapshot_name) = extract_from_pytest_env(
-        snapshot_path, snapshot_name
-    )
-    _assert_snapshot(snapshot_path, snapshot_name, result)
+    test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
+    _assert_snapshot(test_info, result)
 
 
 def insta_snapshot(
