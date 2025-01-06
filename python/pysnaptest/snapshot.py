@@ -17,9 +17,9 @@ if TYPE_CHECKING:
 def extract_snapshot_path(test_path: str) -> str:
     test_path_file = pathlib.Path(test_path)
     snapshot_dir = (
-        test_path_file.resolve().parent
+        test_path_file.resolve()
         if test_path_file.is_file()
-        else pathlib.Path(test_path.split("/")[-1]).resolve().parent
+        else pathlib.Path(test_path.split("/")[-1]).resolve()
     )
     return str(snapshot_dir)
 
@@ -32,7 +32,7 @@ def extract_from_pytest_env(
 
     return TestInfo(
         test_name=test_name,
-        test_path=pathlib.Path(test_path).resolve(),
+        test_path=extract_snapshot_path(test_path),
         snapshot_path_override=snapshot_path,
         snapshot_name_override=snapshot_name,
     )
