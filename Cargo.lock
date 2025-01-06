@@ -214,7 +214,7 @@ dependencies = [
 
 [[package]]
 name = "pysnaptest"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "insta",
  "pyo3",
