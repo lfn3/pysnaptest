@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 def extract_from_pytest_env(
     snapshot_path: str | None = None, snapshot_name: str | None = None
 ) -> TestInfo:
-
     return TestInfo.from_pytest(
         snapshot_path_override=snapshot_path,
         snapshot_name_override=snapshot_name,

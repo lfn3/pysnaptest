@@ -22,12 +22,11 @@ impl Description {
     }
 }
 
-impl Into<String> for Description {
-    fn into(self) -> String {
-        format!("Test File Path: {}", self.test_file_path)
+impl From<Description> for String {
+    fn from(val: Description) -> Self {
+        format!("Test File Path: {}", val.test_file_path)
     }
 }
-
 
 struct PytestStr(String);
 
@@ -42,14 +41,12 @@ impl PytestInfo {
         let path = self.test_path_raw();
         if path.exists() {
             Ok(path)
+        } else if let Some(filename) = path.file_name() {
+            let mut filepath = PathBuf::from("./");
+            filepath.push(filename);
+            Ok(filepath)
         } else {
-            if let Some(filename) = path.file_name() {
-                let mut filepath = PathBuf::from("./");
-                filepath.push(filename);
-                Ok(filepath)
-            } else {
-                return Err(PyValueError::new_err("No test file found"));
-            }
+            Err(PyValueError::new_err("No test file found"))
         }
     }
 
@@ -152,9 +149,9 @@ impl TryInto<insta::Settings> for &TestInfo {
         let mut settings = insta::Settings::clone_current();
         settings.set_snapshot_path(self.snapshot_path()?);
         settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
-        settings.set_description(
-            Description::new(self.pytest_info.test_path()?.to_string_lossy().to_string()),
-        );
+        settings.set_description(Description::new(
+            self.pytest_info.test_path()?.to_string_lossy().to_string(),
+        ));
         settings.set_omit_expression(true);
         Ok(settings)
     }
