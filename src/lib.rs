@@ -1,6 +1,6 @@
+use std::fmt;
 use std::path::PathBuf;
 use std::str;
-use std::fmt;
 use std::{env, path::Path};
 
 use pyo3::{
@@ -14,7 +14,7 @@ const PYSNAPSHOT_SUFFIX: &str = "pysnap";
 
 #[derive(Debug)]
 struct Description {
-    test_file_path: String
+    test_file_path: String,
 }
 
 impl Description {
@@ -29,10 +29,62 @@ impl fmt::Display for Description {
     }
 }
 
+struct PytestStr(String);
+
+struct PytestInfo {
+    test_path: String,
+    pub test_name: String,
+    _test_stage: String,
+}
+
+impl PytestInfo {
+    pub fn test_path(&self) -> PyResult<PathBuf> {
+        let path = self.test_path_raw();
+        if path.exists() {
+            Ok(path)
+        } else {
+            if let Some(filename) = path.file_name() {
+                let mut filepath = PathBuf::from("./");
+                filepath.push(filename);
+                Ok(filepath)
+            } else {
+                return Err(PyValueError::new_err("No test file found"));
+            }
+        }
+    }
+
+    pub fn test_path_raw(&self) -> PathBuf {
+        Path::new(&self.test_path).to_path_buf()
+    }
+}
+
+impl PytestStr {
+    pub fn from_env() -> Self {
+        Self(env::var("PYTEST_CURRENT_TEST").expect("PYTEST_CURRENT_TEST should be set"))
+    }
+}
+
+impl TryInto<PytestInfo> for PytestStr {
+    type Error = PyErr;
+    fn try_into(self) -> Result<PytestInfo, Self::Error> {
+        let re = regex::Regex::new(r"^(?P<test_path>(?:\/tests\/[^\/]+|tests\/[^\/]+)+\.py)::(?P<test_name>[\w_]+)\s\((?P<test_stage>setup|call|teardown)\)$").expect("Regex should be valid");
+        let Some(caps) = re.captures(&self.0) else {
+            return Err(PyValueError::new_err(format!(
+                "PYTEST_CURRENT_TEST does not match expected format {}",
+                &self.0
+            )));
+        };
+        Ok(PytestInfo {
+            test_name: caps["test_name"].to_string(),
+            test_path: caps["test_path"].to_string(),
+            _test_stage: caps["test_stage"].to_string(),
+        })
+    }
+}
+
 #[pyclass(frozen)]
 struct TestInfo {
-    test_path: PathBuf,
-    test_name: String,
+    pytest_info: PytestInfo,
 
     snapshot_path_override: Option<PathBuf>,
     snapshot_name_override: Option<String>,
@@ -40,39 +92,16 @@ struct TestInfo {
 
 #[pymethods]
 impl TestInfo {
-    #[new]
-    #[pyo3(signature = (test_name, test_path, snapshot_path_override = None, snapshot_name_override = None))]
-    fn new(
-        test_name: String,
-        test_path: PathBuf,
-        snapshot_path_override: Option<PathBuf>,
-        snapshot_name_override: Option<String>,
-    ) -> PyResult<Self> {
-        Ok(TestInfo {
-            test_name,
-            test_path,
-            snapshot_path_override,
-            snapshot_name_override,
-        })
-    }
-
     #[staticmethod]
     #[pyo3(signature = (snapshot_path_override = None, snapshot_name_override = None))]
     fn from_pytest(
         snapshot_path_override: Option<PathBuf>,
         snapshot_name_override: Option<String>,
     ) -> PyResult<Self> {
-        let pytest_test = env::var("PYTEST_CURRENT_TEST").unwrap();
-        let re = regex::Regex::new(r"^(?P<test_path>(?:\/tests\/[^\/]+|tests\/[^\/]+)+\.py)::(?P<test_name>[\w_]+)\s\((?P<test_stage>setup|call|teardown)\)$").unwrap();
-        let Some(caps) = re.captures(&pytest_test) else { return Err(PyValueError::new_err("PYTEST_CURRENT_TEST does not match expected format"))};
-        let path = Path::new(&caps["test_path"]).to_path_buf();
+        let pytest_test_str = PytestStr::from_env();
+        let pytest_info: PytestInfo = pytest_test_str.try_into()?;
         Ok(TestInfo {
-            test_name: caps["test_name"].to_string(),
-            test_path: if path.exists() {path} else {
-                let mut filepath = PathBuf::from("./");
-                filepath.push( path.file_name().unwrap());
-                filepath
-            },
+            pytest_info,
             snapshot_path_override,
             snapshot_name_override,
         })
@@ -84,11 +113,15 @@ impl TestInfo {
         }
 
         let mut test_file_dir = self
-            .test_path
-            .canonicalize().unwrap()
+            .pytest_info
+            .test_path()?
+            .canonicalize()?
             .parent()
             .ok_or_else(|| {
-                PyValueError::new_err("Invalid 'current_test' value - should contain a single '::'")
+                PyValueError::new_err(format!(
+                    "Invalid test_path: {:?}, not yielding a parent directory",
+                    self.pytest_info.test_path_raw()
+                ))
             })?
             .to_path_buf();
         test_file_dir.push("snapshots");
@@ -101,11 +134,9 @@ impl TestInfo {
             return sno.clone();
         }
 
-        let test_name = self
-            .test_name
-            .strip_suffix(" (call)")
-            .unwrap_or(self.test_name.as_ref());
-        let file_name = self.test_path.file_stem().and_then(|s| s.to_str());
+        let test_name = &self.pytest_info.test_name;
+        let test_path = self.pytest_info.test_path_raw();
+        let file_name = test_path.file_stem().and_then(|s| s.to_str());
         if let Some(f) = file_name {
             format!("{f}_{test_name}")
         } else {
@@ -122,7 +153,8 @@ impl TryInto<insta::Settings> for &TestInfo {
         settings.set_snapshot_path(self.snapshot_path()?);
         settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
         settings.set_description(
-            Description::new(self.test_path.to_string_lossy().to_string()).to_string(),
+            Description::new(self.pytest_info.test_path()?.to_string_lossy().to_string())
+                .to_string(),
         );
         settings.set_omit_expression(true);
         Ok(settings)
