@@ -1,4 +1,7 @@
 use std::path::PathBuf;
+use std::str;
+use std::fmt;
+use std::{env, path::Path};
 
 use pyo3::{
     exceptions::PyValueError,
@@ -8,6 +11,23 @@ use pyo3::{
 };
 
 const PYSNAPSHOT_SUFFIX: &str = "pysnap";
+
+#[derive(Debug)]
+struct Description {
+    test_file_path: String
+}
+
+impl Description {
+    pub fn new(test_file_path: String) -> Self {
+        Self { test_file_path }
+    }
+}
+
+impl fmt::Display for Description {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Test File Path: {}", self.test_file_path)
+    }
+}
 
 #[pyclass(frozen)]
 struct TestInfo {
@@ -36,6 +56,28 @@ impl TestInfo {
         })
     }
 
+    #[staticmethod]
+    #[pyo3(signature = (snapshot_path_override = None, snapshot_name_override = None))]
+    fn from_pytest(
+        snapshot_path_override: Option<PathBuf>,
+        snapshot_name_override: Option<String>,
+    ) -> PyResult<Self> {
+        let pytest_test = env::var("PYTEST_CURRENT_TEST").unwrap();
+        let re = regex::Regex::new(r"^(?P<test_path>(?:\/tests\/[^\/]+|tests\/[^\/]+)+\.py)::(?P<test_name>[\w_]+)\s\((?P<test_stage>setup|call|teardown)\)$").unwrap();
+        let Some(caps) = re.captures(&pytest_test) else { return Err(PyValueError::new_err("PYTEST_CURRENT_TEST does not match expected format"))};
+        let path = Path::new(&caps["test_path"]).to_path_buf();
+        Ok(TestInfo {
+            test_name: caps["test_name"].to_string(),
+            test_path: if path.exists() {path} else {
+                let mut filepath = PathBuf::from("./");
+                filepath.push( path.file_name().unwrap());
+                filepath
+            },
+            snapshot_path_override,
+            snapshot_name_override,
+        })
+    }
+
     fn snapshot_path(&self) -> PyResult<PathBuf> {
         if let Some(snapshot_path) = self.snapshot_path_override.clone() {
             return Ok(snapshot_path);
@@ -43,12 +85,12 @@ impl TestInfo {
 
         let mut test_file_dir = self
             .test_path
+            .canonicalize().unwrap()
             .parent()
             .ok_or_else(|| {
                 PyValueError::new_err("Invalid 'current_test' value - should contain a single '::'")
             })?
             .to_path_buf();
-
         test_file_dir.push("snapshots");
 
         Ok(test_file_dir)
@@ -79,7 +121,9 @@ impl TryInto<insta::Settings> for &TestInfo {
         let mut settings = insta::Settings::clone_current();
         settings.set_snapshot_path(self.snapshot_path()?);
         settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
-        settings.set_input_file(&self.test_path);
+        settings.set_description(
+            Description::new(self.test_path.to_string_lossy().to_string()).to_string(),
+        );
         settings.set_omit_expression(true);
         Ok(settings)
     }
