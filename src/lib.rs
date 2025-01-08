@@ -199,3 +199,17 @@ fn pysnaptest(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(assert_csv_snapshot, m)?)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use pyo3::PyErr;
+
+    use crate::{PytestInfo, PytestStr};
+
+    #[test]
+    fn test_into_pyinfo() {
+        let s = "tests/a/b/test_thing.py::test_a (call)";
+        let pti: Result<PytestInfo, PyErr> = PytestStr(s.to_string()).try_into();
+        assert!(pti.is_ok())
+    }
+}
