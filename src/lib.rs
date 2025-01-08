@@ -1,4 +1,3 @@
-use std::fmt;
 use std::path::PathBuf;
 use std::str;
 use std::{env, path::Path};
@@ -23,11 +22,12 @@ impl Description {
     }
 }
 
-impl fmt::Display for Description {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Test File Path: {}", self.test_file_path)
+impl Into<String> for Description {
+    fn into(self) -> String {
+        format!("Test File Path: {}", self.test_file_path)
     }
 }
+
 
 struct PytestStr(String);
 
@@ -153,8 +153,7 @@ impl TryInto<insta::Settings> for &TestInfo {
         settings.set_snapshot_path(self.snapshot_path()?);
         settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
         settings.set_description(
-            Description::new(self.pytest_info.test_path()?.to_string_lossy().to_string())
-                .to_string(),
+            Description::new(self.pytest_info.test_path()?.to_string_lossy().to_string()),
         );
         settings.set_omit_expression(true);
         Ok(settings)
