@@ -1,0 +1,10 @@
+---
+source: src/lib.rs
+expression: pti
+---
+Ok(
+    PytestInfo {
+        test_path: "tests/a/b/test_thing.py",
+        test_name: "test_a",
+    },
+)

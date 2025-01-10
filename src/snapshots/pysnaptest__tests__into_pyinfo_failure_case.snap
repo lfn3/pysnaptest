@@ -1,0 +1,9 @@
+---
+source: src/lib.rs
+expression: pti
+---
+Err(
+    SplitError(
+        "tests/a/b/test_thing.py",
+    ),
+)
