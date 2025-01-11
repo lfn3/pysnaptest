@@ -37,7 +37,7 @@ struct PytestInfo {
 
 #[derive(Debug)]
 enum Error {
-    SplitError(String),
+    CouldNotSplit(String),
     InvalidEnvVar(VarError),
     NoTestFile,
 }
@@ -45,7 +45,7 @@ enum Error {
 impl From<Error> for PyErr {
     fn from(value: Error) -> Self {
         match value {
-            Error::SplitError(s) => PyValueError::new_err(format!(
+            Error::CouldNotSplit(s) => PyValueError::new_err(format!(
                 "Expected '::' to be in PYTEST_CURRENT_TEST string ({s})"
             )),
             Error::InvalidEnvVar(ve) => match ve {
@@ -60,8 +60,8 @@ impl From<Error> for PyErr {
 }
 
 impl PytestInfo {
-    pub fn from_env<'s>() -> Result<Self, Error> {
-        let pytest_str = env::var("PYTEST_CURRENT_TEST").map_err(|e| Error::InvalidEnvVar(e))?;
+    pub fn from_env() -> Result<Self, Error> {
+        let pytest_str = env::var("PYTEST_CURRENT_TEST").map_err(Error::InvalidEnvVar)?;
         pytest_str.parse()
     }
 
@@ -87,8 +87,9 @@ impl FromStr for PytestInfo {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (test_path, test_name_and_stage) =
-            s.split_once("::").ok_or(Error::SplitError(s.to_string()))?;
+        let (test_path, test_name_and_stage) = s
+            .split_once("::")
+            .ok_or(Error::CouldNotSplit(s.to_string()))?;
 
         let test_name = test_name_and_stage
             .split_once(" ")
