@@ -22,7 +22,10 @@ def extract_from_pytest_env(
 
 
 def assert_json_snapshot(
-    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None, redactions: Optional[Dict[str, str]] = None
+    result: Any,
+    snapshot_path: str | None = None,
+    snapshot_name: str | None = None,
+    redactions: Optional[Dict[str, str]] = None,
 ):
     test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
     _assert_json_snapshot(test_info, result, redactions)
@@ -83,15 +86,20 @@ def assert_snapshot(
 
 
 def insta_snapshot(
-    result: Any, snapshot_path: str | None = None, snapshot_name: str | None = None, redactions: Optional[Dict[str, str]] = None
+    result: Any,
+    snapshot_path: str | None = None,
+    snapshot_name: str | None = None,
+    redactions: Optional[Dict[str, str]] = None,
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name, redactions)
         return
 
     if redactions is not None:
-        raise ValueError("Redactions may only be used with json snapshots. Pass a list or dict instead.")
-    
+        raise ValueError(
+            "Redactions may only be used with json snapshots. Pass a list or dict instead."
+        )
+
     if try_is_pandas_df(result) or try_is_polars_df(result):
         assert_dataframe_snapshot(result, snapshot_path, snapshot_name)
     else:
@@ -114,14 +122,17 @@ def snapshot(  # noqa: F811
     *,
     snapshot_path: str | None = None,
     snapshot_name: str | None = None,
-    redactions: Optional[Dict[str, str]] = None
+    redactions: Optional[Dict[str, str]] = None,
 ) -> Callable:
     if asyncio.iscoroutinefunction(func):
 
         async def asserted_func(func: Callable, *args: Any, **kwargs: Any):
             result = await func(*args, **kwargs)
             insta_snapshot(
-                result, snapshot_path=snapshot_path, snapshot_name=snapshot_name, redactions=redactions
+                result,
+                snapshot_path=snapshot_path,
+                snapshot_name=snapshot_name,
+                redactions=redactions,
             )
 
     else:
@@ -129,7 +140,10 @@ def snapshot(  # noqa: F811
         def asserted_func(func: Callable, *args: Any, **kwargs: Any):
             result = func(*args, **kwargs)
             insta_snapshot(
-                result, snapshot_path=snapshot_path, snapshot_name=snapshot_name, redactions=redactions
+                result,
+                snapshot_path=snapshot_path,
+                snapshot_name=snapshot_name,
+                redactions=redactions,
             )
 
     # Without arguments `func` is passed directly to the decorator
