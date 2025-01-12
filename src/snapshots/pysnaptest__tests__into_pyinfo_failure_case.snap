@@ -3,7 +3,7 @@ source: src/lib.rs
 expression: pti
 ---
 Err(
-    SplitError(
+    CouldNotSplit(
         "tests/a/b/test_thing.py",
     ),
 )
