@@ -87,6 +87,7 @@ def insta_snapshot(
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name, redactions)
+        return
 
     if redactions is not None:
         raise ValueError("Redactions may only be used with json snapshots. Pass a list or dict instead.")
