@@ -1,3 +1,4 @@
+use std::env::VarError;
 use std::path::PathBuf;
 use std::str::{self, FromStr};
 use std::{env, path::Path};
@@ -28,19 +29,43 @@ impl From<Description> for String {
     }
 }
 
+#[derive(Debug)]
 struct PytestInfo {
     test_path: String,
-    pub test_name: String,
+    test_name: String,
+}
+
+#[derive(Debug)]
+enum Error {
+    CouldNotSplit(String),
+    InvalidEnvVar(VarError),
+    NoTestFile,
+}
+
+impl From<Error> for PyErr {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::CouldNotSplit(s) => PyValueError::new_err(format!(
+                "Expected '::' to be in PYTEST_CURRENT_TEST string ({s})"
+            )),
+            Error::InvalidEnvVar(ve) => match ve {
+                VarError::NotPresent => PyValueError::new_err("PYTEST_CURRENT_TEST is not set"),
+                VarError::NotUnicode(os_string) => PyValueError::new_err(format!(
+                    "PYTEST_CURRENT_TEST is not a valid unicode string: {os_string:#?}"
+                )),
+            },
+            Error::NoTestFile => PyValueError::new_err("No test file found"),
+        }
+    }
 }
 
 impl PytestInfo {
-    pub fn from_env() -> Result<Self, PyErr> {
-        let pytest_str =
-            env::var("PYTEST_CURRENT_TEST").expect("PYTEST_CURRENT_TEST should be set");
+    pub fn from_env() -> Result<Self, Error> {
+        let pytest_str = env::var("PYTEST_CURRENT_TEST").map_err(Error::InvalidEnvVar)?;
         pytest_str.parse()
     }
 
-    pub fn test_path(&self) -> PyResult<PathBuf> {
+    pub fn test_path(&self) -> Result<PathBuf, Error> {
         let path = self.test_path_raw();
         if path.exists() {
             Ok(path)
@@ -49,7 +74,7 @@ impl PytestInfo {
             filepath.push(filename);
             Ok(filepath)
         } else {
-            Err(PyValueError::new_err("No test file found"))
+            Err(Error::NoTestFile)
         }
     }
 
@@ -59,22 +84,22 @@ impl PytestInfo {
 }
 
 impl FromStr for PytestInfo {
-    type Err = PyErr;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parts = s.splitn(2, "::");
-        let opt_test_path = parts.next();
-        let opt_test_name = parts.next().and_then(|s| s.split(" ").next());
-        if let (Some(test_path), Some(test_name)) = (opt_test_path, opt_test_name) {
-            Ok(PytestInfo {
-                test_name: test_name.to_string(),
-                test_path: test_path.to_string(),
-            })
-        } else {
-            Err(PyValueError::new_err(format!(
-                "Unable to parse {s} into PytestInfo"
-            )))
-        }
+        let (test_path, test_name_and_stage) = s
+            .split_once("::")
+            .ok_or(Error::CouldNotSplit(s.to_string()))?;
+
+        let test_name = test_name_and_stage
+            .split_once(" ")
+            .map(|(tn, _stage)| tn)
+            .unwrap_or(test_name_and_stage);
+
+        Ok(PytestInfo {
+            test_name: test_name.to_string(),
+            test_path: test_path.to_string(),
+        })
     }
 }
 
@@ -200,14 +225,28 @@ fn pysnaptest(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use pyo3::PyErr;
+    use insta::assert_debug_snapshot;
 
-    use crate::PytestInfo;
+    use crate::{Error, PytestInfo};
 
     #[test]
-    fn test_into_pyinfo() {
+    fn test_into_pyinfo_happy_path() {
         let s = "tests/a/b/test_thing.py::test_a (call)";
-        let pti: Result<PytestInfo, PyErr> = s.parse();
-        assert!(pti.is_ok())
+        let pti: Result<PytestInfo, Error> = s.parse();
+        assert_debug_snapshot!(pti)
+    }
+
+    #[test]
+    fn test_into_pyinfo_no_trailer() {
+        let s = "tests/a/b/test_thing.py::test_a";
+        let pti: Result<PytestInfo, Error> = s.parse();
+        assert_debug_snapshot!(pti)
+    }
+
+    #[test]
+    fn test_into_pyinfo_failure_case() {
+        let s = "tests/a/b/test_thing.py";
+        let pti: Result<PytestInfo, Error> = s.parse();
+        assert_debug_snapshot!(pti)
     }
 }

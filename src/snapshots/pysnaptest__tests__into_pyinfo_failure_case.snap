@@ -1,0 +1,9 @@
+---
+source: src/lib.rs
+expression: pti
+---
+Err(
+    CouldNotSplit(
+        "tests/a/b/test_thing.py",
+    ),
+)
