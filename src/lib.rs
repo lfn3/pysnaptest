@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env::VarError;
 use std::path::PathBuf;
 use std::str::{self, FromStr};
@@ -181,10 +182,20 @@ impl TryInto<insta::Settings> for &TestInfo {
 }
 
 #[pyfunction]
-fn assert_json_snapshot(test_info: &TestInfo, result: &Bound<'_, PyAny>) -> PyResult<()> {
+#[pyo3(signature = (test_info, result, redactions=None))]
+fn assert_json_snapshot(
+    test_info: &TestInfo,
+    result: &Bound<'_, PyAny>,
+    redactions: Option<HashMap<String, String>>,
+) -> PyResult<()> {
     let res: serde_json::Value = pythonize::depythonize(result).unwrap();
     let snapshot_name = test_info.snapshot_name();
-    let settings: insta::Settings = test_info.try_into()?;
+    let mut settings: insta::Settings = test_info.try_into()?;
+
+    for (selector, redaction) in redactions.unwrap_or_default() {
+        settings.add_redaction(selector.as_str(), redaction)
+    }
+
     settings.bind(|| {
         insta::assert_json_snapshot!(snapshot_name, res);
     });
@@ -192,10 +203,20 @@ fn assert_json_snapshot(test_info: &TestInfo, result: &Bound<'_, PyAny>) -> PyRe
 }
 
 #[pyfunction]
-fn assert_csv_snapshot(test_info: &TestInfo, result: &Bound<'_, PyAny>) -> PyResult<()> {
+#[pyo3(signature = (test_info, result, redactions=None))]
+fn assert_csv_snapshot(
+    test_info: &TestInfo,
+    result: &Bound<'_, PyAny>,
+    redactions: Option<HashMap<String, String>>,
+) -> PyResult<()> {
     let res: serde_json::Value = pythonize::depythonize(result).unwrap();
     let snapshot_name = test_info.snapshot_name();
-    let settings: insta::Settings = test_info.try_into()?;
+    let mut settings: insta::Settings = test_info.try_into()?;
+
+    for (selector, redaction) in redactions.unwrap_or_default() {
+        settings.add_redaction(selector.as_str(), redaction)
+    }
+
     settings.bind(|| {
         insta::assert_csv_snapshot!(snapshot_name, res);
     });

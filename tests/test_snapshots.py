@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from pysnaptest import snapshot, assert_json_snapshot, assert_dataframe_snapshot
+from pysnaptest import (
+    snapshot,
+    assert_json_snapshot,
+    assert_dataframe_snapshot,
+    assert_csv_snapshot,
+)
 import pytest
 
 try:
@@ -69,3 +74,21 @@ def test_assert_snapshot_multiple():
     snapshot_name_prefix = "test_snapshots_test_assert_snapshot_multiple"
     assert_json_snapshot("expected_result_1", snapshot_name=f"{snapshot_name_prefix}_1")
     assert_json_snapshot("expected_result_2", snapshot_name=f"{snapshot_name_prefix}_2")
+
+
+def test_assert_json_snapshot_with_redactions():
+    assert_json_snapshot(
+        {
+            "level_one": "left_alone",
+            "also_level_one": "should_be_redacted",
+        },
+        redactions={".also_level_one": "[redacted]"},
+    )
+
+
+@snapshot(redactions={".also_level_one": "[redacted]"})
+def test_snapshot_with_redactions():
+    return {
+        "level_one": "left_alone",
+        "also_level_one": "should_be_redacted",
+    }
