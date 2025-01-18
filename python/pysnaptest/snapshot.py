@@ -3,7 +3,7 @@ from ._pysnaptest import assert_json_snapshot as _assert_json_snapshot
 from ._pysnaptest import assert_csv_snapshot as _assert_csv_snapshot
 from ._pysnaptest import assert_snapshot as _assert_snapshot
 from ._pysnaptest import TestInfo
-from typing import Callable, Any, Dict, overload, Union, TYPE_CHECKING
+from typing import Callable, Any, Dict, overload, Union, Optional, TYPE_CHECKING
 from functools import partial, wraps
 import asyncio
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def extract_from_pytest_env(
-    snapshot_path: str | None = None, snapshot_name: str | None = None
+    snapshot_path: Optional[str] = None, snapshot_name: Optional[str] = None
 ) -> TestInfo:
     return TestInfo.from_pytest(
         snapshot_path_override=snapshot_path,
@@ -23,9 +23,9 @@ def extract_from_pytest_env(
 
 def assert_json_snapshot(
     result: Any,
-    snapshot_path: str | None = None,
-    snapshot_name: str | None = None,
-    redactions: Dict[str, str] | None = None,
+    snapshot_path: Optional[str] = None,
+    snapshot_name: Optional[str] = None,
+    redactions: Optional[Dict[str, str]] = None,
 ):
     test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
     _assert_json_snapshot(test_info, result, redactions)
@@ -33,9 +33,9 @@ def assert_json_snapshot(
 
 def assert_csv_snapshot(
     result: Any,
-    snapshot_path: str | None = None,
-    snapshot_name: str | None = None,
-    redactions: Dict[str, str] | None = None,
+    snapshot_path: Optional[str] = None,
+    snapshot_name: Optional[str] = None,
+    redactions: Optional[Dict[str, str]] = None,
 ):
     test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
     _assert_csv_snapshot(test_info, result, redactions)
@@ -61,9 +61,9 @@ def try_is_polars_df(maybe_df: Any) -> bool:
 
 def assert_dataframe_snapshot(
     df: Union[pd.DataFrame, pl.DataFrame],
-    snapshot_path: str | None = None,
-    snapshot_name: str | None = None,
-    redactions: Dict[str, str] | None = None,
+    snapshot_path: Optional[str] = None,
+    snapshot_name: Optional[str] = None,
+    redactions: Optional[Dict[str, str]] = None,
     *args,
     **kwargs,
 ):
@@ -91,9 +91,9 @@ def assert_snapshot(
 
 def insta_snapshot(
     result: Any,
-    snapshot_path: str | None = None,
-    snapshot_name: str | None = None,
-    redactions: Dict[str, str] | None = None,
+    snapshot_path: Optional[str] = None,
+    snapshot_name: Optional[str] = None,
+    redactions: Optional[Dict[str, str]] = None,
 ):
     if isinstance(result, dict) or isinstance(result, list):
         assert_json_snapshot(result, snapshot_path, snapshot_name, redactions)
@@ -111,17 +111,17 @@ def snapshot(func: Callable) -> Callable: ...
 
 @overload
 def snapshot(
-    *, filename: str | None = None, folder_path: str | None = None
+    *, filename: Optional[str] = None, folder_path: Optional[str] = None
 ) -> Callable:  # noqa: F811
     ...
 
 
 def snapshot(  # noqa: F811
-    func: Callable | None = None,
+    func: Optional[Callable] = None,
     *,
-    snapshot_path: str | None = None,
-    snapshot_name: str | None = None,
-    redactions: Dict[str, str] | None = None,
+    snapshot_path: Optional[str] = None,
+    snapshot_name: Optional[str] = None,
+    redactions: Optional[Dict[str, str]] = None,
 ) -> Callable:
     if asyncio.iscoroutinefunction(func):
 
