@@ -5,5 +5,5 @@ from .snapshot import (
     assert_csv_snapshot,
     assert_snapshot,
     assert_dataframe_snapshot,
-    assert_binary_snapshot
+    assert_binary_snapshot,
 )

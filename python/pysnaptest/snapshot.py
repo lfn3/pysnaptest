@@ -84,7 +84,10 @@ def assert_dataframe_snapshot(
 
 
 def assert_binary_snapshot(
-    result: bytes, snapshot_path: str | None = None, snapshot_name: str | None = None, extension: str = "bin"
+    result: bytes,
+    snapshot_path: str | None = None,
+    snapshot_name: str | None = None,
+    extension: str = "bin",
 ):
     test_info = extract_from_pytest_env(snapshot_path, snapshot_name)
     _assert_binary_snapshot(test_info, extension, result)
