@@ -15,7 +15,7 @@ requires-python = ">=3.8"
 [project.optional-dependencies]
 pandas = ["pandas>=0.12.0"]
 polars = ["polars>=0.18"]
-pyarrow = ["pyarrow>=19.0.0"]
+pyarrow = ["pyarrow>=17.0.0"]
 
 [tool.maturin]
 bindings = 'pyo3'
