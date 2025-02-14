@@ -1,33 +1,33 @@
 [build-system]
-requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
+requires = ["maturin>=1.7,<2.0"]
 
 [project]
-name = "pysnaptest"
-requires-python = ">=3.8"
 classifiers = [
-    "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+name = "pysnaptest"
+requires-python = ">=3.8"
 
 [project.optional-dependencies]
 pandas = ["pandas>=0.12.0"]
-pyarrow = ["pyarrow>=19.0.0"]
 polars = ["polars>=0.18"]
+pyarrow = ["pyarrow>=17.0.0"]
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
-python-source = "python"
-module-name = "pysnaptest._pysnaptest"
 bindings = 'pyo3'
+features = ["pyo3/extension-module"]
+module-name = "pysnaptest._pysnaptest"
+python-source = "python"
 
 [tool.pytest.ini_options]
 testpaths = "tests"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.4",
-    "pytest-asyncio>=0.24.0",
+  "pytest>=8.3.4",
+  "pytest-asyncio>=0.24.0",
 ]
