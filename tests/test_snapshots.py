@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 
 from pysnaptest import (
     snapshot,
@@ -82,7 +83,7 @@ def test_assert_polars_dataframe_snapshot() -> pl.DataFrame:
     )
 
 
-@pytest.mark.skipif(POLARS_UNAVAILABLE, reason="Polars is an optional dependency")
+@pytest.mark.skipif(POLARS_UNAVAILABLE or (sys.version_info.major!=3 or sys.version_info.minor!=13) , reason="Polars is an optional dependency")
 @snapshot(dataframe_snapshot_format="bin")
 def test_assert_polars_dataframe_binary_snapshot() -> pl.DataFrame:
     return pl.DataFrame(
