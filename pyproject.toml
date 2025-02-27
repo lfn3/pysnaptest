@@ -10,7 +10,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 name = "pysnaptest"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
 pandas = ["pandas>=0.12.0"]
