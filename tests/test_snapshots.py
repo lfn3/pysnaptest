@@ -29,11 +29,11 @@ except ImportError:
 def test_snapshot_number() -> int:
     return 5
 
-def test_snapshot_duplicates() -> int:
+def test_snapshot_duplicates():
     assert_snapshot("1")
     assert_snapshot("2")
 
-def test_snapshot_duplicates_allow_when_named() -> int:
+def test_snapshot_duplicates_allow_when_named():
     snapshot_name = "test_snapshot_duplicates_allow_when_named"
     assert_snapshot("1", snapshot_name=snapshot_name)
     assert_snapshot("1", snapshot_name=snapshot_name)
