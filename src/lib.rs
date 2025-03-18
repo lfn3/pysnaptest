@@ -1,6 +1,5 @@
 use std::collections::{BTreeMap, HashMap};
 use std::env::VarError;
-use std::fmt::format;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::str::{self, FromStr};
