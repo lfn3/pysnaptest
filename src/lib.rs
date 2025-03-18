@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::env::VarError;
+use std::fmt::format;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::str::{self, FromStr};
@@ -141,7 +142,7 @@ impl TestInfo {
         })
     }
 
-    fn snapshot_path(&self) -> PyResult<PathBuf> {
+    fn snapshot_folder(&self) -> PyResult<PathBuf> {
         if let Some(snapshot_path) = self.snapshot_path_override.clone() {
             return Ok(snapshot_path);
         }
@@ -209,7 +210,7 @@ impl TryInto<insta::Settings> for &TestInfo {
 
     fn try_into(self) -> PyResult<insta::Settings> {
         let mut settings = insta::Settings::clone_current();
-        settings.set_snapshot_path(self.snapshot_path()?);
+        settings.set_snapshot_path(self.snapshot_folder()?);
         settings.set_snapshot_suffix(PYSNAPSHOT_SUFFIX);
         settings.set_description(Description::new(
             self.pytest_info.test_path()?.to_string_lossy().to_string(),
@@ -264,11 +265,36 @@ fn last_snapshot_name() -> PyResult<String> {
 
 #[pyfunction]
 fn next_snapshot_name() -> PyResult<String> {
-    let c = counters();
+    let counters = counters();
     let base_snapshot_name =
         TestInfo::from_pytest(Option::None, Option::None)?.base_snapshot_name();
-    let test_idx = c.get(&base_snapshot_name).cloned().unwrap_or(0) + 1;
+    let test_idx = counters.get(&base_snapshot_name).cloned().unwrap_or(0) + 1;
     Ok(snapshot_name_with_idx(&base_snapshot_name, test_idx))
+}
+
+#[pyfunction]
+fn snapshot_folder() -> PyResult<PathBuf> {
+    TestInfo::from_pytest(Option::None, Option::None)?.snapshot_folder()
+}
+
+#[pyfunction]
+fn last_snapshot_path() -> PyResult<PathBuf> {
+    let test_info = TestInfo::from_pytest(Option::None, Option::None)?;
+    let snapshot_folder = test_info.snapshot_folder()?;
+    let base_snapshot_name = test_info.base_snapshot_name();
+    let test_idx = counters().get(&base_snapshot_name).cloned().unwrap_or(1);
+    let snapshot_name = snapshot_name_with_idx(&base_snapshot_name, test_idx);
+    Ok(snapshot_folder.join(format!("pysnaptest__{}@pysnap.snap", snapshot_name)))
+}
+
+#[pyfunction]
+fn next_snapshot_path() -> PyResult<PathBuf> {
+    let test_info = TestInfo::from_pytest(Option::None, Option::None)?;
+    let snapshot_folder = test_info.snapshot_folder()?;
+    let base_snapshot_name = test_info.base_snapshot_name();
+    let test_idx = counters().get(&base_snapshot_name).cloned().unwrap_or(0) + 1;
+    let snapshot_name = snapshot_name_with_idx(&base_snapshot_name, test_idx);
+    Ok(snapshot_folder.join(format!("pysnaptest__{}@pysnap.snap", snapshot_name)))
 }
 
 #[pyclass(unsendable)]
@@ -379,6 +405,9 @@ fn pysnaptest(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(assert_csv_snapshot, m)?)?;
     m.add_function(wrap_pyfunction!(last_snapshot_name, m)?)?;
     m.add_function(wrap_pyfunction!(next_snapshot_name, m)?)?;
+    m.add_function(wrap_pyfunction!(snapshot_folder, m)?)?;
+    m.add_function(wrap_pyfunction!(last_snapshot_path, m)?)?;
+    m.add_function(wrap_pyfunction!(next_snapshot_path, m)?)?;
     m.add_class::<PySnapshot>()?;
     Ok(())
 }

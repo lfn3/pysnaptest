@@ -13,8 +13,9 @@ from pysnaptest import (
     PySnapshot,
     last_snapshot_name,
     next_snapshot_name,
+    snapshot_folder,
     last_snapshot_path,
-    next_snapshot_path,
+    last_snapshot_path,
 )
 import pytest
 
@@ -204,6 +205,6 @@ def test_equivalent_to_allow_duplicate_or_from_the_front():
 
 def test_snapshot_then_load():
     expected = "expected_result_1"
-    assert_json_snapshot(expected)
+    assert_snapshot(expected)
     snapshot = PySnapshot.from_file(last_snapshot_path())
-    assert snapshot.decode() == expected
+    assert snapshot.contents().decode() == expected

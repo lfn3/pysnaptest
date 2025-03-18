@@ -10,6 +10,7 @@ from .snapshot import (
     rounded_redaction,
     last_snapshot_name,
     next_snapshot_name,
+    snapshot_folder,
     last_snapshot_path,
     next_snapshot_path,
 )

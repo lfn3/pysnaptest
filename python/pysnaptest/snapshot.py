@@ -4,7 +4,10 @@ from ._pysnaptest import assert_csv_snapshot as _assert_csv_snapshot
 from ._pysnaptest import assert_snapshot as _assert_snapshot
 from ._pysnaptest import assert_binary_snapshot as _assert_binary_snapshot
 from ._pysnaptest import last_snapshot_name as _last_snapshot_name
+from ._pysnaptest import last_snapshot_path as _last_snapshot_path
 from ._pysnaptest import next_snapshot_name as _next_snapshot_name
+from ._pysnaptest import next_snapshot_path as _next_snapshot_path
+from ._pysnaptest import snapshot_folder as _snapshot_folder
 from ._pysnaptest import TestInfo
 from typing import Callable, Any, Dict, overload, Union, Optional, TYPE_CHECKING
 from functools import partial, wraps
@@ -37,16 +40,20 @@ def last_snapshot_name() -> str:
     return _last_snapshot_name()
 
 
-def last_snapshot_path() -> Path:
-    raise NotImplementedError()
-
-
 def next_snapshot_name() -> str:
     return _next_snapshot_name()
 
 
+def snapshot_folder() -> Path:
+    return Path(_snapshot_folder())
+
+
+def last_snapshot_path() -> Path:
+    return Path(_last_snapshot_path())
+
+
 def next_snapshot_path() -> Path:
-    raise NotImplementedError()
+    return Path(_next_snapshot_path())
 
 
 def assert_json_snapshot(
