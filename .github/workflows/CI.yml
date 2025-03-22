@@ -18,6 +18,7 @@ on:
 
 env:
   INTERPRETERS: python3.9 python3.10 python3.11 python3.12 python3.13 python3.13t pypy3.9 pypy3.10
+  WINDOWS_INTERPRETERS: python3.9 python3.10 python3.11 python3.12 python3.13 python3.13
 
 permissions:
   contents: read
@@ -110,7 +111,7 @@ jobs:
           PYO3_PYTHON: python${{ matrix.python-version }}
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ env.INTERPRETERS }}
+          args: --release --out dist --interpreter ${{ env.WINDOWS_INTERPRETERS }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
