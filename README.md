@@ -1,7 +1,5 @@
 # PySnapTest
 
-Prove CI is broken on main?
-
 `pysnaptest` is a Python wrapper for the powerful [Insta](https://insta.rs/) library written in Rust. It brings the simplicity and performance of snapshot testing from Rust to Python, enabling developers to quickly and easily test complex outputs, including strings, JSON, and other serializable data.
 
 Snapshot testing helps ensure that your code produces consistent outputs as you make changes. By capturing the output of your code and comparing it to a stored "snapshot," you can detect unintended changes with ease.
